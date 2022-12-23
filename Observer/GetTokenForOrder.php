@@ -17,10 +17,11 @@ class GetTokenForOrder implements ObserverInterface
      * @param \Magento\Framework\App\Request\Http $request
      */
     public function __construct(
-        \Magento\Framework\App\Request\Http $request,
+        \Magento\Framework\App\Request\Http  $request,
         \Soisy\PaymentMethod\Helper\Settings $settings,
-        \Soisy\PaymentMethod\Log\Logger $logger
-    ) {
+        \Soisy\PaymentMethod\Log\Logger      $logger
+    )
+    {
         $this->_request = $request;
         $this->settings = $settings;
         $this->logger = $logger;
@@ -43,7 +44,7 @@ class GetTokenForOrder implements ObserverInterface
         $payment = $order->getPayment()->getMethodInstance()->getCode();
         $this->logger->log('notice', "soisyOrderCreate: paymenth method: $payment");
 
-        if ($payment!='soisy') {
+        if ($payment != 'soisy') {
             $this->logger->log('notice', "soisyOrderCreate: payment is not soisy, skip");
             return;
         }
@@ -76,10 +77,10 @@ class GetTokenForOrder implements ObserverInterface
         $postdata = [
             'firstname' => $customerFirstname,
             'lastname' => $customerLastname,
-            'email'=> $customerEmail,
+            'email' => $customerEmail,
             'amount' => $amount_cent,
             'successUrl' => $successUrl,
-            'errorUrl'=> $errorUrl,
+            'errorUrl' => $errorUrl,
             'orderReference' => $incrementId
         ];
 
@@ -91,31 +92,30 @@ class GetTokenForOrder implements ObserverInterface
             $postdata['orderReference'] = 'SOISY-SANDBOX-' . $incrementId;
         }
 
-        foreach($postdata as $k => $v) {
+        foreach ($postdata as $k => $v) {
             $this->logger->log('notice', " postdata $k: $v");
         }
 
         $token = $this->getSoisyToken($postdata);
 
-        if ($token===false) {
+        if ($token === false) {
             $this->logger->log('notice', " token: FALSE");
-            $this->logger->log('notice', "soisyOrderCreate: end" );
+            $this->logger->log('notice', "soisyOrderCreate: end");
             return;
         }
         $this->logger->log('notice', "token: $token");
 
-        $webapp=trim($this->settings->getWebapp());
-        $webapp=rtrim($webapp,'/');
-        $shopId=trim($this->settings->getShopId());
-        $webappUrl="{$webapp}/{$shopId}#/loan-request?token={$token}";
+        $webapp = trim($this->settings->getWebapp());
+        $webapp = rtrim($webapp, '/');
+        $shopId = trim($this->settings->getShopId());
+        $webappUrl = "{$webapp}/{$shopId}#/loan-request?token={$token}";
 
 
         $this->logger->log('notice', "webappUrl: $webappUrl");
 
-        $endpoint=trim($this->settings->getEndpoint());
-        $endpoint=rtrim($endpoint,'/');
-        $orderUrl="{$endpoint}/api/shops/{$shopId}/orders/$token";
-
+        $endpoint = trim($this->settings->getEndpoint());
+        $endpoint = rtrim($endpoint, '/');
+        $orderUrl = "{$endpoint}/api/shops/{$shopId}/orders/$token";
 
         //$order->addStatusToHistory(Mage_Sales_Model_Order::STATE_HOLDED, Mage::helper('soisy')->__('Customer was redirected to Soisy'));
         $stringSoisyToken = "Token Soisy";
@@ -130,41 +130,86 @@ class GetTokenForOrder implements ObserverInterface
         $order->setSoisyToken($token);
 
         $order->save();
-        $this->logger->log( 'notice', "soisyOrderCreate: end" );
+        $this->logger->log('notice', "soisyOrderCreate: end");
     }
 
-    protected function getSoisyToken($postdata) {
+    protected function getSoisyToken($postdata)
+    {
 
         $shopId = trim($this->settings->getShopId());
         $authToken = trim($this->settings->getAuthToken());
         $endpoint = trim($this->settings->getEndpoint());
-        $endpoint = rtrim($endpoint,'/');
+        $endpoint = rtrim($endpoint, '/');
         $soisyUrl = "{$endpoint}/api/shops/{$shopId}/orders";
         $this->logger->log('notice', " shopId:$shopId - authToken:$authToken - soisyUrl:$soisyUrl");
 
         $postquery = http_build_query($postdata);
         $context = stream_context_create([
-            'http'=>[ 'method'  =>'POST',
+            'http' => ['method' => 'POST',
                 'timeout' => 5.0,
-                'header'  =>"X-Auth-Token: $authToken\r\nContent-Type: application/x-www-form-urlencoded",
+                'header' => "X-Auth-Token: $authToken\r\nContent-Type: application/x-www-form-urlencoded",
                 'content' => $postquery]
         ]);
-        $this->logger->log('notice', " soisyUrl: $soisyUrl");
+        //$this->logger->log('notice', " soisyUrl: $soisyUrl ");
+        //$result = file_get_contents($soisyUrl,false,$context);
+        $result = $this->curl_get_file_contents($soisyUrl, $authToken, $postdata);
 
-        $result = @file_get_contents($soisyUrl,false,$context);
-        if ($result===false) {
+        //$response=print_r($http_response_header,true);
+        //$this->logger->log('debug', "http_response_header:".$response);
+
+        if ($result === false) {
+            $this->logger->log('debug', 'result false');
             return false;
         }
-        $data = json_decode($result,true);
+        if ($result === null && json_last_error() !== JSON_ERROR_NONE) {
+            $this->logger->log('debug', 'result is not a valid json');
+            $this->logger->log('debug', 'result: ' . print_r($result, true));
+        }
+        $data = json_decode($result, true);
+
+        if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+            $this->logger->log('debug', 'result is not a valid json');
+            $this->logger->log('debug', 'result: ' . print_r($result, true));
+        }
+
         if (!is_array($data)) {
+            $this->logger->log('debug', 'data is not an array ');
             return false;
         }
         if (empty($data['token'])) {
-            $errors=$data['errors'];
-            $this->logger->log('notice', ' Errors: '.$errors);
+            $errors = $data['errors'];
+            $this->logger->log('notice', ' Errors: ' . $errors);
             return false;
         }
         $token = $data['token'];
         return $token;
     }
+
+    protected function curl_get_file_contents($URL, $authToken, $postdata)
+    {
+        $postdata = http_build_query($postdata);
+        $this->logger->log('notice', "begin curl_get_file_contents ");
+        $headers = [];
+        $headers[] = "X-Auth-Token: $authToken";
+        $headers[] = 'Content-Type: application/x-www-form-urlencoded; charset=utf-8';
+        try {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_URL, $URL);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            $contents = curl_exec($ch);
+            curl_close($ch);
+        } catch (\Exception $e) {
+            $this->logger->log('notice', "error: " . $e->getMessage());
+        }
+
+        $this->logger->log('notice', "end curl_get_file_contents ");
+        if ($contents) {
+            return $contents;
+        }
+        return FALSE;
+    }
+
 }
