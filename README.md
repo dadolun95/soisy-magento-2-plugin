@@ -17,7 +17,7 @@ Requirements
 
 Compatibility
 -------------
-- Magento  2.3.0 - 2.3.2 - 2.3.4 - 2.3.6 - 2.4.0 - 2.4.1 (with php 7.3)
+- Magento  2.3.0 - 2.3.2 - 2.3.4 - 2.3.6 - 2.4.0 - 2.4.1 - 2.4.4 - 2.4.5
 
 
 Installation Instructions

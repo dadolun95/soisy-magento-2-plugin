@@ -11,7 +11,7 @@
 
         <div class="actions-toolbar">
             <div class="primary">
-                <a class="action primary continue" href="<?= $block->getLink() ?>"><span><?= __("go to soisy") ?></span></a>
+                <a class="action primary continue  border-2 inline-block p-3" href="<?= $block->getLink() ?>"><span><?= __("go to soisy") ?></span></a>
             </div>
         </div>
     </div>
@@ -28,13 +28,7 @@
             display: none;
         }
     </style>
-    <script>
-        require(['jquery'], function($){
-            $(window).load(function() {
-                window.setTimeout(function(){
-                    window.location.href = "<?= $block->getLink() ?>";
-                }, 5000);
-            });
-        });
+    <script type="text/javascript">
+        setTimeout(function(){document.location.href = '<?= $block->getLink() ?>';},5000);
     </script>
 <?php endif; ?>
