@@ -1,6 +1,6 @@
-Magento 2 Soisy Payment Extension
+Magento 2 Pagolight Payment Extension
 =================================
-Magento 2.3.x, 2.4.x Soisy's installment payment method
+Magento 2.3.x, 2.4.x Pagolight's installment payment method
 
 Facts
 -----
@@ -67,11 +67,11 @@ The customer can see the intalments simulated on the product view page, if the p
 
 ![simulation widget on product page](view/frontend/web/images/readme/simulation.png)
 
-The customer choose the Soisy payment method:
+The customer choose the Pagolight payment method:
 
 ![Checkout](view/frontend/web/images/readme/checkout.png)
 
-When the order is placed the user lands on the magento success page. In this page the customer will be redirected to soisy website.
+When the order is placed the user lands on the magento success page. In this page the customer will be redirected to pagolight website.
 
 ![Success page](view/frontend/web/images/readme/success_page.png)
 
@@ -79,11 +79,11 @@ When the order is placed the user lands on the magento success page. In this pag
 
 #### Manage oders
 
-Once the customer place the order the store manager can see some information inside status comments. here the store manager could see the *soisy token* used to map the magento order with Soisy order.  
+Once the customer place the order the store manager can see some information inside status comments. here the store manager could see the *pagolight token* used to map the magento order with Pagolight order.  
 
 ![Order status comments](view/frontend/web/images/readme/order_status_comments.png)
 
-When Soisy approves an order the store manager should change manually the magento order status from *pending* to *processing*.
+When Pagolight approves an order the store manager should change manually the magento order status from *pending* to *processing*.
 
 ## Features not implemented or not tested
 
@@ -109,8 +109,8 @@ Any contribution is highly appreciated. The best way to contribute code is to op
 
 Developer
 ---------
-* [Soisy](http://www.soisy.it)
+* [Pagolight](https://pagolight.it/)
 
 Copyright
 ---------
-(c) 2022 Soisy
+(c) 2023 Pagolight

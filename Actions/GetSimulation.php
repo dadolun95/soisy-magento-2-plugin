@@ -18,7 +18,7 @@ class GetSimulation
     }
 
     /**
-     * Return default widget generated remotly by Soisy API
+     * Return default widget generated remotely by Soisy API
      * @param $amount
      * @return string
      */
@@ -35,16 +35,12 @@ class GetSimulation
 
     public function execute(float $amount)
     {
-        if (!$this->settings->isActive()) {
+        if (!$this->settings->isActive() || !$this->settings->showSimulation()) {
             return false;
         }
 
         if ($amount < $this->settings->getMinAmount()) {
             return false;
-        }
-
-        if (!$this->settings->showSimulation()) {
-            return $this->settings->getFrontendDescription();
         }
 
         /*

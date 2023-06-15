@@ -22,7 +22,7 @@ define(
             },
 
             getSimulation: function () {
-                return window.checkoutConfig.payment.simulation[this.item.method];
+                return window.checkoutConfig.payment.simulation[this.item.method] !== false ? window.checkoutConfig.payment.simulation[this.item.method]: "";
             }
         });
     }

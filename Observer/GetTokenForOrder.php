@@ -45,17 +45,17 @@ class GetTokenForOrder implements ObserverInterface
         $this->logger->log('notice', "soisyOrderCreate: paymenth method: $payment");
 
         if ($payment != 'soisy') {
-            $this->logger->log('notice', "soisyOrderCreate: payment is not soisy, skip");
+            $this->logger->log('notice', "pagolightOrderCreate: payment is not pagolight, skip");
             return;
         }
 
         if ($order->getSoisyToken()) {
-            $this->logger->log('notice', "soisyOrderCreate: token already exists, skip");
+            $this->logger->log('notice', "pagolightOrderCreate: token already exists, skip");
             return;
         }
 
         if ($this->settings->isSandbox()) {
-            $this->logger->log('notice', "soisyOrderCreate: SANDBOX MODE.");
+            $this->logger->log('notice', "pagolightOrderCreate: SANDBOX MODE.");
         }
 
         $incrementId = $order->getIncrementId();
@@ -88,7 +88,7 @@ class GetTokenForOrder implements ObserverInterface
          * Generate a random unique email and a generic orderReference for sandbox customer.
          * */
         if ($this->settings->isSandbox()) {
-            $postdata['email'] = 'soisysandbox' . date('YmdHis') . '@example.com';
+            $postdata['email'] = 'pagolightsandbox' . date('YmdHis') . '@example.com';
             $postdata['orderReference'] = 'SOISY-SANDBOX-' . $incrementId;
         }
 
@@ -100,7 +100,7 @@ class GetTokenForOrder implements ObserverInterface
 
         if ($token === false) {
             $this->logger->log('notice', " token: FALSE");
-            $this->logger->log('notice', "soisyOrderCreate: end");
+            $this->logger->log('notice', "pagolightOrderCreate: end");
             return;
         }
         $this->logger->log('notice', "token: $token");
@@ -117,9 +117,9 @@ class GetTokenForOrder implements ObserverInterface
         $endpoint = rtrim($endpoint, '/');
         $orderUrl = "{$endpoint}/api/shops/{$shopId}/orders/$token";
 
-        //$order->addStatusToHistory(Mage_Sales_Model_Order::STATE_HOLDED, Mage::helper('soisy')->__('Customer was redirected to Soisy'));
-        $stringSoisyToken = "Token Soisy";
-        $stringCustomerWebappUrl = "Link avvio processo cliente su soisy";
+        //$order->addStatusToHistory(Mage_Sales_Model_Order::STATE_HOLDED, Mage::helper('soisy')->__('Customer was redirected to Pagolight'));
+        $stringSoisyToken = "Token Pagolight";
+        $stringCustomerWebappUrl = "Link avvio processo cliente su pagolight";
         $stringSoisyOrderInfo = "Dati json associazione ordine (per debug)";
         $order->addStatusHistoryComment("
 <b>$stringSoisyToken:</b> $token <br>\n
@@ -130,7 +130,7 @@ class GetTokenForOrder implements ObserverInterface
         $order->setSoisyToken($token);
 
         $order->save();
-        $this->logger->log('notice', "soisyOrderCreate: end");
+        $this->logger->log('notice', "pagolightOrderCreate: end");
     }
 
     protected function getSoisyToken($postdata)
@@ -141,7 +141,7 @@ class GetTokenForOrder implements ObserverInterface
         $endpoint = trim($this->settings->getEndpoint());
         $endpoint = rtrim($endpoint, '/');
         $soisyUrl = "{$endpoint}/api/shops/{$shopId}/orders";
-        $this->logger->log('notice', " shopId:$shopId - authToken:$authToken - soisyUrl:$soisyUrl");
+        $this->logger->log('notice', " shopId:$shopId - authToken:$authToken - pagolightUrl:$soisyUrl");
 
         $postquery = http_build_query($postdata);
         $context = stream_context_create([
@@ -150,7 +150,7 @@ class GetTokenForOrder implements ObserverInterface
                 'header' => "X-Auth-Token: $authToken\r\nContent-Type: application/x-www-form-urlencoded",
                 'content' => $postquery]
         ]);
-        //$this->logger->log('notice', " soisyUrl: $soisyUrl ");
+        //$this->logger->log('notice', " pagolightUrl: $soisyUrl ");
         //$result = file_get_contents($soisyUrl,false,$context);
         $result = $this->curl_get_file_contents($soisyUrl, $authToken, $postdata);
 

@@ -2,6 +2,6 @@
 
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="sales_order">
-        <column xsi:type="varchar" name="soisy_token" nullable="true" comment="Soisy Token" />
+        <column xsi:type="varchar" name="soisy_token" nullable="true" comment="Pagolight Token" />
     </table>
 </schema>
