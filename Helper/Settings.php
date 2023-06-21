@@ -62,6 +62,11 @@ class Settings extends AbstractHelper
         return $this->getSettings('min_order_total');
     }
 
+    public function getMaxAmount()
+    {
+        return $this->getSettings('max_order_total');
+    }
+
     public function getEndpoint()
     {
         if ($this->isSandbox()) {
