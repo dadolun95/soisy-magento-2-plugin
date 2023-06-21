@@ -11,7 +11,7 @@ define(
         rendererList.push(
             {
                 type: 'soisy',
-                component: 'Soisy_PaymentMethod/js/view/payment/method-renderer/soisy-method'
+                component: 'Soisy_PaymentMethod/js/view/payment/method-renderer/pagolight-method'
             }
         );
         /** Add view logic here if needed */
